@@ -30,7 +30,10 @@
 /* Split memory into area for vectors and ram */
 MEMORY
 {
-	flash  (rx) : ORIGIN = 0x000D6100, LENGTH = 732K /* BK-W8 A/B slot */
+	/* BK-W8 A/B slot. The slot runs from the image origin up to the trampoline
+	   that spliceOBK.sh installs, so state the end address and subtract. A
+	   rounded length here would let the image overrun the trampoline. */
+	flash  (rx) : ORIGIN = 0x000D6100, LENGTH = 0x0018F000 - 0x000D6100
 	ram   (rw!x): ORIGIN = 0x00400100, LENGTH = 256k - 0x100
 }
 
@@ -82,14 +85,13 @@ SECTIONS
 	} > flash
 	
 /* globals.for example: int ram_data[3]={4,5,6}; */		/* VMA in RAM, but keep LMA in flash */
-	_begin_data = .;
-	.data : AT ( _begin_data )
+	.data :
 	{
 		*(.data .data.*)
 		*(.sdata) 
 		*(.gnu.linkonce.d*)
     	SORT(CONSTRUCTORS)
-	} >ram
+	} >ram AT>flash
 	
 	/* Loader will copy data from _flash_begin to _ram_begin..ram_end */
 	_data_flash_begin = LOADADDR(.data);
