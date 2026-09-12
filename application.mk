@@ -614,6 +614,18 @@ MISC_LIB = ./libmisc.a
 SRC_S_LIB = ./libsrc_s.a
 
 
+# The vendor packager names its output after the flash size it chose, with the same
+# thresholds as tools/beken_packager/beken_packager_wrapper. CFG_FLASH_SELECTION_TYPE
+# arrives from the generated .config, so a board selecting 4M gets 4M.1220 and the
+# renames in the application recipe have to follow it. They said 2M.1220 outright,
+# which fails on any selection but 2M.
+PACK_VER := $(shell s=$$(( $(or $(CFG_FLASH_SELECTION_TYPE),0) + 0 )); \
+    if   [ $$s -ge 8388608 ]; then echo 8M; \
+    elif [ $$s -ge 4194304 ]; then echo 4M; \
+    elif [ $$s -ge 2097152 ]; then echo 2M; \
+    elif [ $$s -ge 1048576 ]; then echo 1M; \
+    else echo 2M; fi).1220
+
 NANO_LIBG_PATH := $(shell $(CC) -mthumb -mcpu=arm968e-s -march=armv5te -print-file-name=libg_nano.a)
 ifeq ($(NANO_LIBG_PATH),libg_nano.a)
 LIBC_NANO = -lg
@@ -702,25 +714,25 @@ endif
 ifeq ($(VENDOR_PACKAGE), 1)
 ifeq ($(SOC_BK7231T), 1)
 	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i 1 -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i 1 -s $(CFG_FLASH_SELECTION_TYPE); fi)
-	$(Q)mv $(BIN_DIR)/bk7231_2M.1220.bin $(BIN_DIR)/bk7231t_QIO.bin
-	$(Q)mv $(BIN_DIR)/bk7231_bsp_uart_2M.1220.bin $(BIN_DIR)/bk7231t_UA.bin
+	$(Q)mv $(BIN_DIR)/bk7231_$(PACK_VER).bin $(BIN_DIR)/bk7231t_QIO.bin
+	$(Q)mv $(BIN_DIR)/bk7231_bsp_uart_$(PACK_VER).bin $(BIN_DIR)/bk7231t_UA.bin
 else
 	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i $(CFG_SOC_NAME) -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i $(CFG_SOC_NAME) -s $(CFG_FLASH_SELECTION_TYPE); fi)
-	$(Q)mv $(BIN_DIR)/$(CFG_SOC_NAME_STR)_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_QIO.bin
-	$(Q)mv $(BIN_DIR)/$(CFG_SOC_NAME_STR)_bsp_uart_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_UA.bin
+	$(Q)mv $(BIN_DIR)/$(CFG_SOC_NAME_STR)_$(PACK_VER).bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_QIO.bin
+	$(Q)mv $(BIN_DIR)/$(CFG_SOC_NAME_STR)_bsp_uart_$(PACK_VER).bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_UA.bin
 endif
 ifeq ($(CFG_SOC_NAME), 5)
 	$(Q)rm $(BIN_DIR)/bk7231_bsp.bin
 	$(Q)cp $(BIN_DIR)/bsp_enc.bin $(BIN_DIR)/bk7231_bsp.bin
 	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK BK7231M$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i 9 -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i 9 -s $(CFG_FLASH_SELECTION_TYPE); fi)
-	$(Q)mv $(BIN_DIR)/bk7231m_2M.1220.bin $(BIN_DIR)/BK7231M_QIO.bin
+	$(Q)mv $(BIN_DIR)/bk7231m_$(PACK_VER).bin $(BIN_DIR)/BK7231M_QIO.bin
 endif
 ifeq ($(CFG_SOC_NAME), 3)
 	$(Q)rm $(BIN_DIR)/bk7231_bsp.bin
 	$(Q)cp $(BIN_DIR)/bsp_enc.bin $(BIN_DIR)/bk7231_bsp.bin
 	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(CFG_SOC_NAME_STR)_Tuya$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i 10 -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i 10 -s $(CFG_FLASH_SELECTION_TYPE); fi)
-	$(Q)mv $(BIN_DIR)/bk7252_tuya_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_Tuya_QIO.bin
-	$(Q)mv $(BIN_DIR)/bk7252_tuya_bsp_uart_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_Tuya_UA.bin
+	$(Q)mv $(BIN_DIR)/bk7252_tuya_$(PACK_VER).bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_Tuya_QIO.bin
+	$(Q)mv $(BIN_DIR)/bk7252_tuya_bsp_uart_$(PACK_VER).bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_Tuya_UA.bin
 endif
 endif
 
