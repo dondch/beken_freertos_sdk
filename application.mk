@@ -495,6 +495,19 @@ endif
 CCFLAGS += -g0 -mthumb -mcpu=arm968e-s -march=armv5te -mthumb-interwork -mlittle-endian -Os
 CCFLAGS += -ffunction-sections -Wall -Wno-format -Wno-unknown-pragmas -fsigned-char -fdata-sections -nostdlib -fno-strict-aliasing
 
+# GCC 14 promoted a group of long-standing C warnings to errors, and added
+# -Wchanges-meaning for C++. This tree does not compile clean on any of them,
+# upstream included, so keep the whole group as warnings. -Wreturn-mismatch and
+# -Wdeclaration-missing-parameter-type do not exist before GCC 14, and naming
+# one there is itself a hard error, so gate those two on the version.
+CC_MAJOR := $(shell $(CC) -dumpversion 2>/dev/null | cut -d. -f1)
+CCFLAGS += -Wno-error=implicit-function-declaration -Wno-error=implicit-int
+CCFLAGS += -Wno-error=int-conversion -Wno-error=incompatible-pointer-types
+CCFLAGS += -Wno-error=changes-meaning
+ifeq ($(shell test "$(CC_MAJOR)" -ge 14 2>/dev/null && echo yes),yes)
+CCFLAGS += -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type
+endif
+
 CXXFLAGS = $(CCFLAGS)
 CXXFLAGS += -std=gnu++11 -MMD -fno-exceptions -fno-rtti -Wno-literal-suffix -Wno-attributes
 CXXFLAGS += -g0 -mthumb -mcpu=arm968e-s -march=armv5te -mthumb-interwork -mlittle-endian -Os -ffunction-sections -Wno-format -fsigned-char -fdata-sections -fno-strict-aliasing
@@ -600,6 +613,14 @@ FUNC_LIB  = ./libfunc.a
 MISC_LIB = ./libmisc.a
 SRC_S_LIB = ./libsrc_s.a
 
+
+NANO_LIBG_PATH := $(shell $(CC) -mthumb -mcpu=arm968e-s -march=armv5te -print-file-name=libg_nano.a)
+ifeq ($(NANO_LIBG_PATH),libg_nano.a)
+LIBC_NANO = -lg
+else
+LIBC_NANO = -lg_nano
+endif
+
 LIBFLAGS = -lstdc++
 ifeq ($(CFG_SUPPORT_MATTER), 1)
 LIBFLAGS += -L$(CHIP_LIB_PATH) -lMatterApp -lstdc++
@@ -641,9 +662,9 @@ endif
 #	$(Q)$(CC) -E -x c -P ./beken378/func/user_driver/BkFlashPartition.h -o ./tools/beken_packager/flash_partition.o -I ./config
 
 ifeq  ($(CFG_SUPPORT_MATTER), 1)
-	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_ELF) -Wl,--start-group $(LIBFLAGS) -lg_nano -Wl,--end-group -T./build/$(SOC_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_MAP)
+	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_ELF) -Wl,--start-group $(LIBFLAGS) $(LIBC_NANO) -Wl,--end-group -T./build/$(SOC_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_MAP)
 else
-	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_ELF) -Wl,--start-group $(LIBFLAGS) -lg_nano -Wl,--end-group -T./build/$(SOC_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_MAP)
+	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_ELF) -Wl,--start-group $(LIBFLAGS) $(LIBC_NANO) -Wl,--end-group -T./build/$(SOC_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_MAP)
 endif
 	$(Q)$(OBJCOPY) -O binary $(BIN_DIR)/$(SOC_NAME_ELF) $(BIN_DIR)/$(SOC_NAME_BIN)
 #	$(OBJDUMP) -d $(BIN_DIR)/$(SOC_NAME_ELF) >> $(BIN_DIR)/bk7231.asm
@@ -651,9 +672,9 @@ endif
 	@$(ECHO) "  $(GREEN)CRC  $(BIN_DIR)/$(SOC_NAME_BIN)$(NC)"
 
 ifeq ($(CFG_SUPPORT_MATTER), 1)
-	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_BSP_ELF) -Wl,--start-group $(LIBFLAGS) -lg_nano -Wl,--end-group -T./build/$(SOC_BSP_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_BSP_MAP)
+	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_BSP_ELF) -Wl,--start-group $(LIBFLAGS) $(LIBC_NANO) -Wl,--end-group -T./build/$(SOC_BSP_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_BSP_MAP)
 else
-	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_BSP_ELF) -Wl,--start-group $(LIBFLAGS) -lg_nano -Wl,--end-group -T./build/$(SOC_BSP_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_BSP_MAP)
+	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_BSP_ELF) -Wl,--start-group $(LIBFLAGS) $(LIBC_NANO) -Wl,--end-group -T./build/$(SOC_BSP_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_BSP_MAP)
 endif
 	$(Q)$(OBJCOPY) -O binary $(BIN_DIR)/$(SOC_NAME_BSP_ELF) $(BIN_DIR)/$(SOC_NAME_BSP_BIN)
 	$(ENCRYPT) $(BIN_DIR)/$(SOC_NAME_BSP_BIN) $(ENCRYPT_ARGS)
@@ -671,27 +692,36 @@ endif
 	@$(ECHO) ================================================
 
 #	$(Q)-rm -rf $(BLE_PUB_LIB) $(OS_LIB) $(LWIP_LIB) $(WOLFSSL_LIB) $(MBEDTLS_LIB) $(DRIVER_LIB) $(FUNC_LIB) $(MISC_LIB) $(SRC_S_LIB)
+# The vendor packager builds full-flash images: a bootloader, a partition table
+# and the application in one file. On BK-W8 the bootloader cannot be rewritten,
+# so flashing one of those images ends the board, and the table they carry is a
+# stock 2 MB map that does not describe this 4 MB part. Nothing in this fork
+# reads them either, because spliceOBK.sh takes out/bsp.bin. The two mv lines
+# below also name the 2M spelling, so they fail outright on a 4M selection.
+# Build them with VENDOR_PACKAGE=1 if you have a board that wants them.
+ifeq ($(VENDOR_PACKAGE), 1)
 ifeq ($(SOC_BK7231T), 1)
-	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python ./beken_packager_wrapper -i 1 -s $(CFG_FLASH_SELECTION_TYPE); else python ./beken_packager_wrapper -i 1 -s $(CFG_FLASH_SELECTION_TYPE); fi)
+	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i 1 -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i 1 -s $(CFG_FLASH_SELECTION_TYPE); fi)
 	$(Q)mv $(BIN_DIR)/bk7231_2M.1220.bin $(BIN_DIR)/bk7231t_QIO.bin
 	$(Q)mv $(BIN_DIR)/bk7231_bsp_uart_2M.1220.bin $(BIN_DIR)/bk7231t_UA.bin
 else
-	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python ./beken_packager_wrapper -i $(CFG_SOC_NAME) -s $(CFG_FLASH_SELECTION_TYPE); else python ./beken_packager_wrapper -i $(CFG_SOC_NAME) -s $(CFG_FLASH_SELECTION_TYPE); fi)
+	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i $(CFG_SOC_NAME) -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i $(CFG_SOC_NAME) -s $(CFG_FLASH_SELECTION_TYPE); fi)
 	$(Q)mv $(BIN_DIR)/$(CFG_SOC_NAME_STR)_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_QIO.bin
 	$(Q)mv $(BIN_DIR)/$(CFG_SOC_NAME_STR)_bsp_uart_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_UA.bin
 endif
 ifeq ($(CFG_SOC_NAME), 5)
 	$(Q)rm $(BIN_DIR)/bk7231_bsp.bin
 	$(Q)cp $(BIN_DIR)/bsp_enc.bin $(BIN_DIR)/bk7231_bsp.bin
-	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK BK7231M$(NC)"; if [ "$(Q)" = "@" ]; then python ./beken_packager_wrapper -i 9 -s $(CFG_FLASH_SELECTION_TYPE); else python ./beken_packager_wrapper -i 9 -s $(CFG_FLASH_SELECTION_TYPE); fi)
+	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK BK7231M$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i 9 -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i 9 -s $(CFG_FLASH_SELECTION_TYPE); fi)
 	$(Q)mv $(BIN_DIR)/bk7231m_2M.1220.bin $(BIN_DIR)/BK7231M_QIO.bin
 endif
 ifeq ($(CFG_SOC_NAME), 3)
 	$(Q)rm $(BIN_DIR)/bk7231_bsp.bin
 	$(Q)cp $(BIN_DIR)/bsp_enc.bin $(BIN_DIR)/bk7231_bsp.bin
-	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(CFG_SOC_NAME_STR)_Tuya$(NC)"; if [ "$(Q)" = "@" ]; then python ./beken_packager_wrapper -i 10 -s $(CFG_FLASH_SELECTION_TYPE); else python ./beken_packager_wrapper -i 10 -s $(CFG_FLASH_SELECTION_TYPE); fi)
+	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(CFG_SOC_NAME_STR)_Tuya$(NC)"; if [ "$(Q)" = "@" ]; then python3 ./beken_packager_wrapper -i 10 -s $(CFG_FLASH_SELECTION_TYPE); else python3 ./beken_packager_wrapper -i 10 -s $(CFG_FLASH_SELECTION_TYPE); fi)
 	$(Q)mv $(BIN_DIR)/bk7252_tuya_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_Tuya_QIO.bin
 	$(Q)mv $(BIN_DIR)/bk7252_tuya_bsp_uart_2M.1220.bin $(BIN_DIR)/$(CFG_SOC_NAME_STR)_Tuya_UA.bin
+endif
 endif
 
 
