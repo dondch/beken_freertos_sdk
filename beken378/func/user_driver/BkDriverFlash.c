@@ -215,8 +215,8 @@ const bk_logic_partition_t bk7231_partitions_4M[BK_PARTITION_MAX] =
     {
         .partition_owner           = BK_FLASH_EMBEDDED,
         .partition_description     = "ota",
-        .partition_start_addr      = 0x286000,
-        .partition_length          = 0x15A000, //1384KB
+        .partition_start_addr      = 0x210000,// BK-W8: match the bootloader's download partition
+        .partition_length          = 0x1B1000, //1732KB, BK-W8 download partition
         .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_DIS,
     },
     [BK_PARTITION_RF_FIRMWARE] =

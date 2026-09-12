@@ -30,7 +30,7 @@
 /* Split memory into area for vectors and ram */
 MEMORY
 {
-	flash  (rx) : ORIGIN = 0x00010000, LENGTH = 1912K
+	flash  (rx) : ORIGIN = 0x000D6100, LENGTH = 732K /* BK-W8 A/B slot */
 	ram   (rw!x): ORIGIN = 0x00400100, LENGTH = 256k - 0x100
 }
 

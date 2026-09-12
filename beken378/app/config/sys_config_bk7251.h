@@ -373,7 +373,7 @@
 #define FLASH_SELECTION_TYPE_2M                    0x200000 //2MBytes
 #define FLASH_SELECTION_TYPE_4M                    0x400000 //4MBytes
 #define FLASH_SELECTION_TYPE_8M                    0x800000 //8MBytes
-#define CFG_FLASH_SELECTION_TYPE                   FLASH_SELECTION_TYPE_2M
+#define CFG_FLASH_SELECTION_TYPE                   FLASH_SELECTION_TYPE_4M
 
 #define AT_SERVICE_CFG                             0
 
