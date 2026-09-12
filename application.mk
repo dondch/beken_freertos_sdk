@@ -757,138 +757,161 @@ ble: $(BLE_LIB)
 
 $(BLE_LIB): $(OBJ_BLE_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 ip: $(RWNX_LIB)
 
 $(RWNX_LIB): $(OBJ_RWNX_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 wpa: $(WPA_LIB)
 
 $(WPA_LIB): $(OBJ_WPA_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 usb: $(USB_LIB)
 
 $(USB_LIB): $(OBJ_USB_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^	
 
 sensor: $(SENSOR_LIB)
 
 $(SENSOR_LIB): $(OBJ_SENSOR_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 bk_aware: $(BK_AWARE_LIB)
 
 $(BK_AWARE_LIB): $(OBJ_BK_AWARE_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 cal: $(CAL_LIB)
 
 $(CAL_LIB): $(OBJ_CAL_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^	
 
 supplicant: $(SUPPLICANT_LIB)
 
 $(SUPPLICANT_LIB): $(OBJ_SUPPLICANT_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^	
 
 uart_debug: $(UART_DEBUG_LIB)
 
 $(UART_DEBUG_LIB): $(OBJ_UART_DEBUG_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^	
 
 rf_test: $(RF_TEST_LIB)
 
 $(RF_TEST_LIB): $(OBJ_RF_TEST_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^	
 
 rf_use: $(RF_USE_LIB)
 
 $(RF_USE_LIB): $(OBJ_RF_USE_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 codec_helix: $(CODEC_HELIX_LIB)
 
 $(CODEC_HELIX_LIB): $(OBJ_CODEC_HELIX_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 bk_player: $(BK_PLAYER_LIB)
 
 $(BK_PLAYER_LIB): $(OBJ_BK_PLAYER_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 ble_pub: $(BLE_PUB_LIB)
 
 $(BLE_PUB_LIB): $(OBJ_BLE_PUB_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 os: $(OS_LIB)
 
 $(OS_LIB): $(OBJ_OS_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 lwip: $(LWIP_LIB)
 
 $(LWIP_LIB): $(OBJ_LWIP_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 wolfssl: $(WOLFSSL_LIB)
 
 $(WOLFSSL_LIB): $(OBJ_WOLFSSL_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 mbedtls: $(MBEDTLS_LIB)
 
 $(MBEDTLS_LIB): $(OBJ_MBEDTLS_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 driver: $(DRIVER_LIB)
 
 $(DRIVER_LIB): $(OBJ_DRIVER_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 func: $(FUNC_LIB)
 
 $(FUNC_LIB): $(OBJ_FUNC_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 misc: $(MISC_LIB)
 
 $(MISC_LIB): $(OBJ_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 app: $(APP_LIB)
 
 $(APP_LIB): $(OBJ_APP_LIST) $(OBJ_CXX_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 src_s: $(SRC_S_LIB)
 
 $(SRC_S_LIB): $(OBJ_S_LIST)
 	$(Q)$(ECHO) "  $(GREEN)AR   $@$(NC)"
+	$(Q)rm -f $@
 	$(Q)$(AR) -rcs $@ $^
 
 $(OBJ_DIR)/%.o: %.c
