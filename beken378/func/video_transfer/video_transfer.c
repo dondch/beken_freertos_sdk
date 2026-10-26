@@ -575,7 +575,17 @@ int video_transfer_init(TVIDEO_SETUP_DESC_PTR setup_cfg)
 
         if(init_ret != kNoErr)
         {
-            video_transfer_deinit();
+            if(tvideo_thread_hdl)
+            {
+                // the thread exists: it frees the queue and the handle on exit
+                video_transfer_deinit();
+            }
+            else if(tvideo_msg_que)
+            {
+                // the thread was never created, so nothing else frees the queue
+                rtos_deinit_queue(&tvideo_msg_que);
+                tvideo_msg_que = NULL;
+            }
             TVIDEO_FATAL("Error: Failed to video transfer init\r\n");
         }
 
